@@ -1,9 +1,9 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="de">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Soundboard – Handy & PC (Dropbox/Upload, 300+ Jingles)</title>
+<title>Soundboard – Handy & PC (Dropbox/Upload, 300+ Jingles, Kompaktliste, iOS-Upload-Fix)</title>
 <style>
   :root{
     --bg:#0f1115; --panel:#171a21; --muted:#232837; --text:#e6e9f0; --soft:#a9b3c9; --accent:#4da3ff; --accent2:#68e0a6; --warn:#f7c948; --danger:#ff6b6b;
@@ -15,23 +15,23 @@
     background:linear-gradient(180deg,#0b0d12, #111520 120%);
     color:var(--text);
   }
-  .wrap{max-width:1100px; margin:0 auto; padding:20px; display:flex; flex-direction:column; gap:14px}
-  h1{font-size:1.4rem; margin:0 0 6px 0; font-weight:700; letter-spacing:.2px}
+  .wrap{max-width:1100px; margin:0 auto; padding:16px; display:flex; flex-direction:column; gap:12px}
+  h1{font-size:1.35rem; margin:0 0 6px 0; font-weight:700; letter-spacing:.2px}
   .row{display:grid; gap:8px}
-  .row.top{grid-template-columns: 1.2fr 2fr auto auto auto;}
-  .row.opts{grid-template-columns: auto auto auto auto auto 1fr;}
+  .row.top{grid-template-columns: 1.1fr 2fr auto auto auto;}
+  .row.opts{grid-template-columns: auto auto auto auto auto auto 1fr;}
   @media (max-width:900px){
     .row.top{grid-template-columns: 1fr}
-    .row.opts{grid-template-columns: 1fr 1fr 1fr}
+    .row.opts{grid-template-columns: 1fr 1fr}
   }
   label{font-size:.85rem; color:var(--soft); display:block; margin-bottom:6px}
   input[type="text"], input[type="number"], textarea{
-    width:100%; padding:10px 12px; border-radius:10px; border:1px solid #2a3042; background:#141824; color:var(--text); outline:none;
+    width:100%; padding:9px 11px; border-radius:10px; border:1px solid #2a3042; background:#141824; color:var(--text); outline:none;
   }
   textarea{min-height:40px; resize:vertical}
   .btn{
-    display:inline-flex; align-items:center; justify-content:center; gap:8px;
-    padding:10px 14px; border-radius:12px; border:1px solid #2a3042; background:linear-gradient(180deg,#1b2131,#161b28);
+    display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    padding:9px 12px; border-radius:12px; border:1px solid #2a3042; background:linear-gradient(180deg,#1b2131,#161b28);
     color:var(--text); cursor:pointer; user-select:none; text-decoration:none; font-weight:600; letter-spacing:.2px;
     transition:transform .06s ease, box-shadow .2s ease, border-color .2s ease;
     box-shadow:0 2px 8px rgba(0,0,0,.25);
@@ -43,24 +43,33 @@
   .btn.warn{background:linear-gradient(180deg,#2a2617,#221f13); border-color:#6a5b2a; color:#ffe9a7}
   .btn.danger{background:linear-gradient(180deg,#311d22,#2a1820); border-color:#6e2b3c}
   .btn.small{padding:8px 10px; font-size:.92rem; border-radius:10px}
+  .btn.xs{padding:6px 8px; font-size:.86rem; border-radius:9px; min-width:34px; height:34px}
+  .btn.icon{width:34px; padding:0}
   .card{
-    background:linear-gradient(180deg,#151a24,#10141e); border:1px solid #242a3d; border-radius:16px; padding:14px; display:flex; gap:14px; align-items:center;
-    box-shadow:0 2px 10px rgba(0,0,0,.28);
+    background:linear-gradient(180deg,#151a24,#10141e);
+    border:1px solid #242a3d; border-radius:12px; padding:8px 10px;
+    display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center;
+    box-shadow:0 2px 10px rgba(0,0,0,.22);
   }
-  .meta{flex:1 1 auto; min-width:0}
-  .title{font-weight:700; letter-spacing:.2px}
-  .sub{font-size:.85rem; color:var(--soft); word-break:break-all}
-  .actions{display:flex; gap:8px; flex-wrap:wrap}
-  .hint{font-size:.82rem; color:#9fb1ff}
-  .error{font-size:.8rem; color:#ff9aa8}
+  #list{display:flex; flex-direction:column; gap:6px}
+  .meta{min-width:0}
+  .line{display:flex; align-items:center; gap:8px; min-width:0}
+  .title{font-weight:700; letter-spacing:.2px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; font-size:.95rem}
+  .pill{display:inline-block; padding:0px 8px; border-radius:999px; font-size:.72rem; border:1px solid #2a3042; background:#141824; color:#a9b3c9}
+  .src{font-size:.8rem; color:#a9b3c9; word-break:break-all; margin-top:2px}
+  .error{font-size:.78rem; color:#ff9aa8; margin-top:2px}
+  .actions{display:flex; gap:6px; flex-wrap:wrap; justify-self:end}
   .banner{
     display:none; padding:10px 12px; border-radius:12px; background:linear-gradient(180deg,#2a2230,#221c28);
     border:1px dashed #7a4f8a; color:#e7d4f1; box-shadow:0 2px 8px rgba(0,0,0,.25);
   }
   .banner.show{display:block}
-  .muted{color:#a9b3c9}
-  .pill{display:inline-block; padding:2px 8px; border-radius:999px; font-size:.74rem; border:1px solid #2a3042; background:#141824; color:var(--soft)}
-  footer{opacity:.6; font-size:.8rem; text-align:center; padding:10px}
+  footer{opacity:.6; font-size:.8rem; text-align:center; padding:6px}
+  /* Kompaktmodus */
+  #list.compact .card{padding:6px 8px; border-radius:10px}
+  #list.compact .title{font-size:.92rem}
+  #list.compact .src{display:none}
+  #list.compact .btn.xs{height:32px; min-width:32px}
   /* iOS overlay */
   #iosOverlay{
     position:fixed; inset:0; background:rgba(10,12,18,.9);
@@ -85,7 +94,7 @@
     <h2>Audio aktivieren</h2>
     <p>iOS benötigt eine Freigabe, bevor Töne abgespielt werden können.</p>
     <button class="btn primary" id="btnEnableAudio">Jetzt aktivieren</button>
-    <p class="hint" style="margin-top:10px">Nur auf iPhone/iPad nötig. Am Desktop wird kein Overlay gezeigt.</p>
+    <p class="hint" style="margin-top:10px; font-size:.85rem; color:#9fb1ff">Nur auf iPhone/iPad nötig. Am Desktop wird kein Overlay gezeigt.</p>
   </div>
 </div>
 
@@ -113,19 +122,19 @@
     <div class="stack">
       <div style="height:100%">
         <label>&nbsp;</label>
-        <button class="btn primary" id="btnAddUrl">Hinzufügen (URL)</button>
+        <button class="btn primary" id="btnAddUrl" title="URLs hinzufügen">Hinzufügen (URL)</button>
       </div>
     </div>
     <div class="stack">
       <div style="height:100%">
         <label>&nbsp;</label>
-        <button class="btn green" id="btnAddFile">Aus Datei hinzufügen</button>
+        <button class="btn green" id="btnAddFile" title="Dateien auswählen">Aus Datei hinzufügen</button>
       </div>
     </div>
     <div class="stack">
       <div style="height:100%">
         <label>&nbsp;</label>
-        <button class="btn" id="btnBeep">Demo-Ton</button>
+        <button class="btn" id="btnBeep" title="Demo-Ton abspielen">Demo-Ton</button>
       </div>
     </div>
   </div>
@@ -139,6 +148,10 @@
       <input id="chkLoop" type="checkbox" />
       <label for="chkLoop">Loop</label>
     </div>
+    <div class="switch">
+      <input id="chkCompact" type="checkbox" />
+      <label for="chkCompact">Kompaktliste</label>
+    </div>
     <div class="stack">
       <div class="grow">
         <label for="fadeInput">Fade-Dauer (s)</label>
@@ -148,45 +161,45 @@
     <div class="stack">
       <div style="height:100%">
         <label>&nbsp;</label>
-        <button class="btn" id="btnExport">Export</button>
+        <button class="btn" id="btnExport" title="Liste exportieren">Export</button>
       </div>
     </div>
     <div class="stack">
       <div style="height:100%">
         <label>&nbsp;</label>
-        <button class="btn" id="btnImport">Import</button>
+        <button class="btn" id="btnImport" title="Liste importieren">Import</button>
       </div>
     </div>
     <div class="stack">
       <div class="grow" style="height:100%">
         <label>&nbsp;</label>
-        <button class="btn warn" id="btnClearAll">Alles löschen</button>
+        <button class="btn warn" id="btnClearAll" title="Alle Einträge löschen">Alles löschen</button>
       </div>
     </div>
   </div>
 
-  <div id="list" style="display:flex; flex-direction:column; gap:10px"></div>
+  <div id="list"></div>
 
-  <footer>Speichert Einträge lokal im Browser (localStorage + IndexedDB-Fallback für große Uploads). Funktioniert offline & via <code>file://</code>.</footer>
+  <footer>Speichert Einträge lokal im Browser (localStorage + IndexedDB für große Uploads). Funktioniert offline & via <code>file://</code>. Kompaktliste zeigt möglichst viele Jingles gleichzeitig. iOS-Upload-Fix aktiv.</footer>
 
-  <input id="fileInput" type="file" accept="audio/*" multiple style="display:none" />
+  <!-- Wichtig: akzeptierte Dateitypen breit gefasst; auf iOS wird dies per JS auf "*/*" gesetzt -->
+  <input id="fileInput" type="file" accept=".mp3,.m4a,.aac,.wav,.flac,.ogg,audio/*" multiple style="display:none" />
 </div>
 
 <script>
 (() => {
   // --- State & Storage ---
-  // v3: identische Struktur, aber mit Unterstützung für IDB-Referenzen ("idb:<id>") für große Uploads
   const LS_SOUNDS = 'soundboard_sounds_v3';
-  const LS_OPTS   = 'soundboard_opts_v1';
+  const LS_OPTS   = 'soundboard_opts_v2'; // enthält "compact"
 
   /** @type {{id:string, name:string, source:string, type:'data'|'url'}[]} */
   let sounds = loadJSON(LS_SOUNDS, migratePrev() || []);
-  let options = loadJSON(LS_OPTS, { single:true, loop:false, fade:2.0 });
+  let options = loadJSON(LS_OPTS, { single:true, loop:false, fade:2.0, compact:true });
 
-  // Players map: id -> player state
-  const players = new Map(); // {audio, sourceNode?, gainNode?, connected, usingVolumeFallback, blobUrl?, errorText, revokeAfterStop?}
+  // Players map
+  const players = new Map();
 
-  // --- IndexedDB (für große Uploads, damit 300+ Jingles möglich sind) ---
+  // --- IndexedDB für große Uploads ---
   let idbAvailable = !!window.indexedDB;
   let dbPromise = null;
 
@@ -206,7 +219,6 @@
     });
     return dbPromise;
   }
-
   async function idbPut(id, blob){
     const db = await openDB();
     await new Promise((res,rej)=>{
@@ -269,17 +281,27 @@
   const fileInput  = document.getElementById('fileInput');
   const corsBanner = document.getElementById('corsBanner');
 
-  const chkSingle = document.getElementById('chkSingle');
-  const chkLoop   = document.getElementById('chkLoop');
-  const fadeInput = document.getElementById('fadeInput');
+  const chkSingle  = document.getElementById('chkSingle');
+  const chkLoop    = document.getElementById('chkLoop');
+  const chkCompact = document.getElementById('chkCompact');
+  const fadeInput  = document.getElementById('fadeInput');
+
+  // iOS-Upload-Fix: accept entfernen/lockern -> echter Dateien-Picker
+  if (isIOS) {
+    try { fileInput.removeAttribute('accept'); } catch {}
+    try { fileInput.setAttribute('accept','*/*'); } catch {}
+  }
 
   // Initialize options UI
   chkSingle.checked = !!options.single;
   chkLoop.checked   = !!options.loop;
+  chkCompact.checked= !!options.compact;
   fadeInput.value   = Number(options.fade ?? 2.0).toFixed(1);
+  listEl.classList.toggle('compact', !!options.compact);
 
   chkSingle.addEventListener('change', () => { options.single = chkSingle.checked; saveOptions(); });
   chkLoop.addEventListener('change',   () => { options.loop   = chkLoop.checked;   saveOptions(); updateLoopAll(); });
+  chkCompact.addEventListener('change',() => { options.compact= chkCompact.checked; saveOptions(); listEl.classList.toggle('compact', !!options.compact); });
   fadeInput.addEventListener('input',  () => { options.fade   = clamp(parseFloat(fadeInput.value)||2.0, 0, 60); saveOptions(); });
 
   // --- Buttons ---
@@ -303,19 +325,28 @@
     if (list.length === 1) nameInput.value = '';
   });
 
-  document.getElementById('btnAddFile').addEventListener('click', () => fileInput.click());
+  document.getElementById('btnAddFile').addEventListener('click', async () => {
+    // iOS: showPicker() bevorzugen (richtiger Dateien-Picker)
+    try {
+      if (fileInput.showPicker) { await fileInput.showPicker(); return; }
+    } catch {/* Fallback click() */}
+    fileInput.click();
+  });
 
   fileInput.addEventListener('change', async (ev) => {
     const files = Array.from(ev.target.files || []);
-    if (!files.length) return;
+    if (!files.length) {
+      // iOS gab keinen Picker zurück (z. B. aus Musik-App gewählt) -> Hinweis
+      console.warn('Keine Dateien ausgewählt (iOS-Dateien-App verwenden, nicht Musik-App).');
+      return;
+    }
 
     const newEntries = [];
     for (const f of files) {
       const id = genId();
       const displayName = f.name.replace(/\.[^/.]+$/,'') || f.name;
 
-      // Für sehr viele Jingles: große Dateien in IndexedDB, kleine ggf. als Data-URL.
-      const SIZE_THRESHOLD = 200 * 1024; // 200 KB -> alles darüber in IDB
+      const SIZE_THRESHOLD = 200 * 1024; // >200KB in IDB
       if (idbAvailable && f.size > SIZE_THRESHOLD) {
         try {
           await idbPut(id, f);
@@ -324,7 +355,6 @@
         } catch { /* fallback auf Data-URL */ }
       }
 
-      // Data-URL (bei kleinen Dateien oder falls IDB nicht verfügbar)
       const dataUrl = await fileToDataURL(f);
       newEntries.push({ id, name: displayName, source: dataUrl, type:'data' });
     }
@@ -362,7 +392,6 @@
     document.body.appendChild(a);
     a.click();
     setTimeout(() => { URL.revokeObjectURL(href); a.remove(); }, 1000);
-    // Hinweis: IDB-Uploads werden aus Speichergründen nicht in die JSON eingebettet (es bleibt die Referenz "idb:<id>").
     setTimeout(()=>{ try{ window.prompt('JSON kopieren (Strg+C / ⌘C, dann Enter):', data); }catch{} }, 120);
   });
 
@@ -378,7 +407,7 @@
         sounds = obj;
       } else if (obj && Array.isArray(obj.sounds)) {
         sounds = obj.sounds;
-        if (obj.options) { options = Object.assign({single:true, loop:false, fade:2.0}, obj.options); applyOptionsToUI(); }
+        if (obj.options) { options = Object.assign({single:true, loop:false, fade:2.0, compact:true}, obj.options); applyOptionsToUI(); }
       } else {
         alert('Ungültiges Format.');
         return;
@@ -411,29 +440,32 @@
 
     const meta = document.createElement('div');
     meta.className = 'meta';
-    const title = document.createElement('div');
-    title.className = 'title';
-    title.textContent = s.name;
-    const src = document.createElement('div');
-    src.className = 'sub';
-    src.textContent = s.type === 'data' ? '(lokale Datei gespeichert)' : s.source;
-    const tags = document.createElement('div');
-    tags.className = 'sub';
-    tags.innerHTML = `<span class="pill">${s.type === 'data' ? 'Upload' : 'URL'}</span>`;
-    meta.appendChild(title);
-    meta.appendChild(src);
-    meta.appendChild(tags);
+      const line = document.createElement('div');
+      line.className = 'line';
+      const title = document.createElement('span');
+      title.className = 'title';
+      title.textContent = s.name;
+      const tag = document.createElement('span');
+      tag.className = 'pill';
+      tag.textContent = s.type === 'data' ? 'Upload' : 'URL';
+      line.append(title, tag);
+
+      const src = document.createElement('div');
+      src.className = 'src';
+      src.textContent = s.type === 'data' ? '(lokale Datei gespeichert)' : s.source;
+
+      const infoErr = document.createElement('div');
+      infoErr.className = 'error';
+
+    meta.append(line, src, infoErr);
 
     const actions = document.createElement('div');
     actions.className = 'actions';
-    const btnPlay  = btn('▶︎ Play', 'primary small');
-    const btnStop  = btn('⏹ Stop (Fade)', 'small');
-    const btnDel   = btn('Löschen', 'danger small');
-    actions.append(btnPlay, btnStop, btnDel);
-
-    const info = document.createElement('div');
-    info.className = 'error';
-    info.style.flexBasis = '100%';
+      const btnPlay  = mkBtn('▶︎','primary xs icon','Play');
+      const btnStop  = mkBtn('⏹','xs icon','Stop mit Fade');
+      const btnInfo  = mkBtn('i','xs icon','Details ein/aus');
+      const btnDel   = mkBtn('✖','danger xs icon','Löschen');
+      actions.append(btnPlay, btnStop, btnInfo, btnDel);
 
     btnPlay.addEventListener('click', () => playSound(s.id));
     btnStop.addEventListener('click', () => stopSound(s.id));
@@ -447,23 +479,29 @@
       }
       renderList();
     });
+    btnInfo.addEventListener('click', () => {
+      const srcEl = card.querySelector('.src');
+      const visible = srcEl.style.display !== 'none';
+      srcEl.style.display = visible ? 'none' : 'block';
+    });
 
-    card.append(meta, actions, info);
+    card.append(meta, actions);
     return card;
   }
 
   function renderList(){
     listEl.innerHTML = '';
-    // Render aktuell in umgekehrter Reihenfolge (neu zuerst)
+    listEl.classList.toggle('compact', !!options.compact);
     const frag = document.createDocumentFragment();
     for (const s of sounds) frag.appendChild(addCard(s));
     listEl.appendChild(frag);
   }
 
-  function btn(label, cls=''){
+  function mkBtn(label, cls, title){
     const b = document.createElement('button');
     b.className = `btn ${cls}`;
     b.textContent = label;
+    if (title) b.title = title;
     return b;
   }
 
@@ -507,7 +545,6 @@
         if (err) {
           const map = {1:'Abbruch (MEDIA_ERR_ABORTED)', 2:'Netzwerkfehler (MEDIA_ERR_NETWORK)', 3:'Decoderfehler (MEDIA_ERR_DECODE)', 4:'Quelle nicht unterstützt (MEDIA_ERR_SRC_NOT_SUPPORTED)'};
           msg = map[err.code] || msg;
-          // Dropbox /scl/ ohne rlkey?
           try {
             const u = new URL(audio.src);
             if (u.hostname.includes('dropboxusercontent.com') && u.pathname.includes('/scl/fi/') && !u.searchParams.has('rlkey')) {
@@ -527,10 +564,7 @@
         if (String(s.source||'').startsWith('idb:') && idbAvailable) {
           const blobId = String(s.source).slice(4);
           const blob = await idbGet(blobId);
-          if (!blob) {
-            updateError(id, 'Lokale Datei nicht mehr vorhanden.');
-            return;
-          }
+          if (!blob) { updateError(id, 'Lokale Datei nicht mehr vorhanden.'); return; }
           const blobUrl = URL.createObjectURL(blob);
           if (p.blobUrl) { try{ URL.revokeObjectURL(p.blobUrl); }catch{} }
           p.blobUrl = blobUrl;
@@ -538,7 +572,6 @@
           audio.type = blob.type || '';
           revokeAfterStop = true;
         } else {
-          // Data-URL -> Blob -> BlobURL (kein fetch(data:...))
           const {blob, mime} = dataURLToBlob(s.source);
           const blobUrl = URL.createObjectURL(blob);
           if (p.blobUrl) { try{ URL.revokeObjectURL(p.blobUrl); }catch{} }
@@ -557,9 +590,8 @@
 
     try { audio.load(); } catch {}
 
-    // Start sofort
     try {
-      await ensureAudioContext(); // create if needed
+      await ensureAudioContext();
       try { await ctx.resume(); } catch {}
       await audio.play();
     } catch (e) {
@@ -674,7 +706,9 @@
   function applyOptionsToUI(){
     chkSingle.checked = !!options.single;
     chkLoop.checked   = !!options.loop;
+    chkCompact.checked= !!options.compact;
     fadeInput.value   = Number(options.fade ?? 2.0).toFixed(1);
+    listEl.classList.toggle('compact', !!options.compact);
     updateLoopAll();
     saveOptions();
   }
@@ -691,7 +725,6 @@
     try {
       localStorage.setItem(LS_SOUNDS, JSON.stringify(sounds));
     } catch (e) {
-      // localStorage voll – Hinweis & Empfehlung: Dropbox-Links benutzen oder große Uploads erneut hinzufügen (IDB wird automatisch genutzt)
       console.warn('localStorage voll. Bitte große Dateien als Dropbox-Links hinzufügen. Fehler:', e);
       alert('Lokaler Speicher ist voll. Große Uploads werden am besten als Dropbox-Links hinzugefügt.\nBestehende Einträge bleiben erhalten.');
     }
@@ -702,7 +735,6 @@
     try { const t = localStorage.getItem(key); if (!t) return fallback; return JSON.parse(t); } catch { return fallback; }
   }
 
-  // Migration älterer Versionen (v1/v2) -> v3
   function migratePrev(){
     try {
       const old2 = localStorage.getItem('soundboard_sounds_v2');
@@ -755,14 +787,12 @@
       const u = new URL(str);
       if (u.hostname.endsWith('dropbox.com')) u.hostname = 'dl.dropboxusercontent.com';
       if (u.hostname === 'dl.dropbox.com') u.hostname = 'dl.dropboxusercontent.com';
-      // Nur unerwünschte Parameter entfernen – rlkey & Co. behalten!
       const toRemove = ['dl','st','preview','e','utm_source','utm_medium','utm_campaign','t','fbclid','m','token'];
       for (const k of toRemove) u.searchParams.delete(k);
-      u.searchParams.set('raw','1'); // streamen
+      u.searchParams.set('raw','1');
       u.hash = '';
       return u.origin + u.pathname + (u.searchParams.toString() ? ('?' + u.searchParams.toString()) : '');
     } catch {
-      // Fallback: string-basiert (rlkey beibehalten)
       let url = str.replace(/^https?:\/\/(www\.)?dropbox\.com/i, 'https://dl.dropboxusercontent.com');
       url = url.replace(/^https?:\/\/dl\.dropbox\.com/i, 'https://dl.dropboxusercontent.com');
       const parts = url.split('#')[0].split('?');
@@ -783,7 +813,6 @@
 
   function genId(){ return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); }
   function clamp(v,min,max){ return Math.min(max, Math.max(min, v)); }
-  function blink(el){ el.style.outline='2px solid '+getComputedStyle(document.documentElement).getPropertyValue('--accent'); setTimeout(()=>el.style.outline='', 500); }
   function cssEscape(str){ return String(str).replace(/"/g,'\\"'); }
 
   // Safari decode helper (Vorgabe)
@@ -800,26 +829,22 @@
 </script>
 
 <!--
-SCHNELLSTART (kurz)
+SCHNELLSTART
 
-PC (Windows):
-1) Diese index.html doppelklicken (läuft via file://).
-2) „Aus Datei hinzufügen“ (mehrere Dateien möglich) oder viele Dropbox-URL(s) einfügen (je Zeile) → „Hinzufügen (URL)“.
-3) Play drücken. Stop mit Fade (Standard 2,0 s). „Nur ein Jingle gleichzeitig“ stoppt andere automatisch.
+PC:
+1) index.html doppelklicken (file://).
+2) „Aus Datei hinzufügen“ oder Dropbox-URL(s) einfügen → Hinzufügen (URL).
+3) Play / Stop (Fade). „Nur ein Jingle gleichzeitig“ stoppt andere sanft.
 
-iPhone/iPad (Safari/Chrome):
-1) Datei in iCloud Drive speichern.
-2) In „Dateien“-App: Datei teilen → „In Safari öffnen“ (oder zum Home-Bildschirm).
-3) Overlay „Audio aktivieren“ antippen.
-4) Uploads liefern zuverlässige Fades (GainNode). Externe Links können wegen CORS nur Lautstärke-Fades nutzen.
+iPhone/iPad:
+1) In „Dateien“ öffnen → index.html → Teilen → „In Safari öffnen“ (oder GitHub Pages).
+2) Overlay „Audio aktivieren“ tippen.
+3) „Aus Datei hinzufügen“ → iOS zeigt jetzt den echten Dateien-Picker (accept auf */*).
+4) MP3 aus **Dateien-App** wählen (nicht aus Musik-App). Dropbox-Links: Teilen-Link kopieren; die App wandelt ihn korrekt um.
 
-Hinweise für 300+ Jingles:
-• Viele Jingles als Dropbox-Links hinzufügen (klein, schnell, beliebig viele).
-• Bei Uploads speichert die App große Dateien automatisch in IndexedDB (lokal), nicht mehr als riesige Data-URLs in localStorage – so passt auch eine große Sammlung.
-• Export/Import speichert die Liste (inkl. IDB-Verweise). Große Upload-Dateien selbst bleiben lokal im Browser-Speicher.
-
-Persistenz:
-• Liste bleibt nach Reload erhalten (localStorage). Upload-Daten liegen (falls groß) in IndexedDB.
+Hinweis:
+• Große Uploads landen automatisch in IndexedDB; Liste im localStorage. Export/Import speichert Verweise.
+• Externe Links nutzen bei CORS ein Volume-Fade; Uploads liefern GainNode-Fades.
 -->
 </body>
 </html>
