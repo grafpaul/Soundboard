@@ -1,0 +1,825 @@
+﻿<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Soundboard – Handy & PC (Dropbox/Upload, 300+ Jingles)</title>
+<style>
+  :root{
+    --bg:#0f1115; --panel:#171a21; --muted:#232837; --text:#e6e9f0; --soft:#a9b3c9; --accent:#4da3ff; --accent2:#68e0a6; --warn:#f7c948; --danger:#ff6b6b;
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+    background:linear-gradient(180deg,#0b0d12, #111520 120%);
+    color:var(--text);
+  }
+  .wrap{max-width:1100px; margin:0 auto; padding:20px; display:flex; flex-direction:column; gap:14px}
+  h1{font-size:1.4rem; margin:0 0 6px 0; font-weight:700; letter-spacing:.2px}
+  .row{display:grid; gap:8px}
+  .row.top{grid-template-columns: 1.2fr 2fr auto auto auto;}
+  .row.opts{grid-template-columns: auto auto auto auto auto 1fr;}
+  @media (max-width:900px){
+    .row.top{grid-template-columns: 1fr}
+    .row.opts{grid-template-columns: 1fr 1fr 1fr}
+  }
+  label{font-size:.85rem; color:var(--soft); display:block; margin-bottom:6px}
+  input[type="text"], input[type="number"], textarea{
+    width:100%; padding:10px 12px; border-radius:10px; border:1px solid #2a3042; background:#141824; color:var(--text); outline:none;
+  }
+  textarea{min-height:40px; resize:vertical}
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:10px 14px; border-radius:12px; border:1px solid #2a3042; background:linear-gradient(180deg,#1b2131,#161b28);
+    color:var(--text); cursor:pointer; user-select:none; text-decoration:none; font-weight:600; letter-spacing:.2px;
+    transition:transform .06s ease, box-shadow .2s ease, border-color .2s ease;
+    box-shadow:0 2px 8px rgba(0,0,0,.25);
+  }
+  .btn:hover{transform:translateY(-1px); border-color:#3b425a}
+  .btn:active{transform:translateY(0)}
+  .btn.primary{background:linear-gradient(180deg,#1e2b46,#18243a); border-color:#2f4368}
+  .btn.green{background:linear-gradient(180deg,#1b2d26,#16271f); border-color:#2c5747}
+  .btn.warn{background:linear-gradient(180deg,#2a2617,#221f13); border-color:#6a5b2a; color:#ffe9a7}
+  .btn.danger{background:linear-gradient(180deg,#311d22,#2a1820); border-color:#6e2b3c}
+  .btn.small{padding:8px 10px; font-size:.92rem; border-radius:10px}
+  .card{
+    background:linear-gradient(180deg,#151a24,#10141e); border:1px solid #242a3d; border-radius:16px; padding:14px; display:flex; gap:14px; align-items:center;
+    box-shadow:0 2px 10px rgba(0,0,0,.28);
+  }
+  .meta{flex:1 1 auto; min-width:0}
+  .title{font-weight:700; letter-spacing:.2px}
+  .sub{font-size:.85rem; color:var(--soft); word-break:break-all}
+  .actions{display:flex; gap:8px; flex-wrap:wrap}
+  .hint{font-size:.82rem; color:#9fb1ff}
+  .error{font-size:.8rem; color:#ff9aa8}
+  .banner{
+    display:none; padding:10px 12px; border-radius:12px; background:linear-gradient(180deg,#2a2230,#221c28);
+    border:1px dashed #7a4f8a; color:#e7d4f1; box-shadow:0 2px 8px rgba(0,0,0,.25);
+  }
+  .banner.show{display:block}
+  .muted{color:#a9b3c9}
+  .pill{display:inline-block; padding:2px 8px; border-radius:999px; font-size:.74rem; border:1px solid #2a3042; background:#141824; color:var(--soft)}
+  footer{opacity:.6; font-size:.8rem; text-align:center; padding:10px}
+  /* iOS overlay */
+  #iosOverlay{
+    position:fixed; inset:0; background:rgba(10,12,18,.9);
+    display:none; align-items:center; justify-content:center; z-index:9999; backdrop-filter:blur(6px);
+  }
+  #iosOverlay .panel{
+    width:min(560px,92vw); background:linear-gradient(180deg,#161a24,#121621); border:1px solid #2a3145; border-radius:16px; padding:22px;
+    text-align:center; box-shadow:0 10px 40px rgba(0,0,0,.5)
+  }
+  #iosOverlay h2{margin:0 0 10px 0}
+  #iosOverlay p{color:#c7d0e6; margin:0 0 14px 0}
+  .switch{display:flex; align-items:center; gap:8px}
+  .switch input{width:18px;height:18px}
+  .stack{display:flex; gap:8px; flex-wrap:wrap; align-items:end}
+  .grow{flex:1 1 auto}
+  .nowrap{white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="iosOverlay">
+  <div class="panel">
+    <h2>Audio aktivieren</h2>
+    <p>iOS benötigt eine Freigabe, bevor Töne abgespielt werden können.</p>
+    <button class="btn primary" id="btnEnableAudio">Jetzt aktivieren</button>
+    <p class="hint" style="margin-top:10px">Nur auf iPhone/iPad nötig. Am Desktop wird kein Overlay gezeigt.</p>
+  </div>
+</div>
+
+<div class="wrap">
+  <header>
+    <h1>⚡ Soundboard</h1>
+    <div id="corsBanner" class="banner">
+      <strong>Hinweis zu CORS & iOS:</strong> Bei externen Links (z. B. Dropbox) kann iOS Lautstärke-Fades ignorieren. <span class="nowrap">Empfehlung: <strong>„Aus Datei hinzufügen“</strong></span> nutzen, dann sind Fades zuverlässig.
+    </div>
+  </header>
+
+  <div class="row top">
+    <div class="stack">
+      <div class="grow">
+        <label for="nameInput">Name (optional – wird aus Dateiname/URL abgeleitet)</label>
+        <input id="nameInput" type="text" placeholder="z. B. Jingle 1" />
+      </div>
+    </div>
+    <div class="stack">
+      <div class="grow">
+        <label for="urlInput">Dropbox-URL(s) – mehrere Zeilen möglich (Teilen-Links werden automatisch umgewandelt)</label>
+        <textarea id="urlInput" placeholder="Eine oder mehrere Dropbox-URLs, jeweils eigene Zeile"></textarea>
+      </div>
+    </div>
+    <div class="stack">
+      <div style="height:100%">
+        <label>&nbsp;</label>
+        <button class="btn primary" id="btnAddUrl">Hinzufügen (URL)</button>
+      </div>
+    </div>
+    <div class="stack">
+      <div style="height:100%">
+        <label>&nbsp;</label>
+        <button class="btn green" id="btnAddFile">Aus Datei hinzufügen</button>
+      </div>
+    </div>
+    <div class="stack">
+      <div style="height:100%">
+        <label>&nbsp;</label>
+        <button class="btn" id="btnBeep">Demo-Ton</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="row opts">
+    <div class="switch">
+      <input id="chkSingle" type="checkbox" />
+      <label for="chkSingle">Nur ein Jingle gleichzeitig</label>
+    </div>
+    <div class="switch">
+      <input id="chkLoop" type="checkbox" />
+      <label for="chkLoop">Loop</label>
+    </div>
+    <div class="stack">
+      <div class="grow">
+        <label for="fadeInput">Fade-Dauer (s)</label>
+        <input id="fadeInput" type="number" step="0.1" min="0" value="2.0" />
+      </div>
+    </div>
+    <div class="stack">
+      <div style="height:100%">
+        <label>&nbsp;</label>
+        <button class="btn" id="btnExport">Export</button>
+      </div>
+    </div>
+    <div class="stack">
+      <div style="height:100%">
+        <label>&nbsp;</label>
+        <button class="btn" id="btnImport">Import</button>
+      </div>
+    </div>
+    <div class="stack">
+      <div class="grow" style="height:100%">
+        <label>&nbsp;</label>
+        <button class="btn warn" id="btnClearAll">Alles löschen</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="list" style="display:flex; flex-direction:column; gap:10px"></div>
+
+  <footer>Speichert Einträge lokal im Browser (localStorage + IndexedDB-Fallback für große Uploads). Funktioniert offline & via <code>file://</code>.</footer>
+
+  <input id="fileInput" type="file" accept="audio/*" multiple style="display:none" />
+</div>
+
+<script>
+(() => {
+  // --- State & Storage ---
+  // v3: identische Struktur, aber mit Unterstützung für IDB-Referenzen ("idb:<id>") für große Uploads
+  const LS_SOUNDS = 'soundboard_sounds_v3';
+  const LS_OPTS   = 'soundboard_opts_v1';
+
+  /** @type {{id:string, name:string, source:string, type:'data'|'url'}[]} */
+  let sounds = loadJSON(LS_SOUNDS, migratePrev() || []);
+  let options = loadJSON(LS_OPTS, { single:true, loop:false, fade:2.0 });
+
+  // Players map: id -> player state
+  const players = new Map(); // {audio, sourceNode?, gainNode?, connected, usingVolumeFallback, blobUrl?, errorText, revokeAfterStop?}
+
+  // --- IndexedDB (für große Uploads, damit 300+ Jingles möglich sind) ---
+  let idbAvailable = !!window.indexedDB;
+  let dbPromise = null;
+
+  function openDB(){
+    if (!idbAvailable) return Promise.reject(new Error('IDB nicht verfügbar'));
+    if (dbPromise) return dbPromise;
+    dbPromise = new Promise((resolve, reject) => {
+      try{
+        const req = indexedDB.open('sb_audio_db', 1);
+        req.onupgradeneeded = () => {
+          const db = req.result;
+          if (!db.objectStoreNames.contains('files')) db.createObjectStore('files'); // key: id, value: Blob
+        };
+        req.onsuccess = () => resolve(req.result);
+        req.onerror = () => { idbAvailable = false; reject(req.error || new Error('IDB Fehler')); };
+      }catch(e){ idbAvailable = false; reject(e); }
+    });
+    return dbPromise;
+  }
+
+  async function idbPut(id, blob){
+    const db = await openDB();
+    await new Promise((res,rej)=>{
+      const tx = db.transaction('files','readwrite');
+      const r = tx.objectStore('files').put(blob, id);
+      r.onsuccess = () => res();
+      r.onerror = () => rej(r.error);
+    });
+  }
+  async function idbGet(id){
+    const db = await openDB();
+    return await new Promise((res,rej)=>{
+      const tx = db.transaction('files','readonly');
+      const r = tx.objectStore('files').get(id);
+      r.onsuccess = () => res(r.result || null);
+      r.onerror = () => rej(r.error);
+    });
+  }
+  async function idbDelete(id){
+    try{
+      const db = await openDB();
+      await new Promise((res,rej)=>{
+        const tx = db.transaction('files','readwrite');
+        const r = tx.objectStore('files').delete(id);
+        r.onsuccess = () => res();
+        r.onerror = () => rej(r.error);
+      });
+    }catch{}
+  }
+  async function idbClear(){
+    try{
+      const db = await openDB();
+      await new Promise((res,rej)=>{
+        const tx = db.transaction('files','readwrite');
+        const r = tx.objectStore('files').clear();
+        r.onsuccess = () => res();
+        r.onerror = () => rej(r.error);
+      });
+    }catch{}
+  }
+
+  // --- iOS detection ---
+  const ua = navigator.userAgent || '';
+  const isIOS = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const iosOverlay = document.getElementById('iosOverlay');
+  let ctx = null;
+
+  if (isIOS) iosOverlay.style.display = 'flex';
+
+  document.getElementById('btnEnableAudio').addEventListener('click', async () => {
+    await ensureAudioContext();
+    try { await ctx.resume(); } catch {}
+    iosOverlay.style.display = 'none';
+  });
+
+  // --- UI Elements ---
+  const nameInput  = document.getElementById('nameInput');
+  const urlInput   = document.getElementById('urlInput');
+  const listEl     = document.getElementById('list');
+  const fileInput  = document.getElementById('fileInput');
+  const corsBanner = document.getElementById('corsBanner');
+
+  const chkSingle = document.getElementById('chkSingle');
+  const chkLoop   = document.getElementById('chkLoop');
+  const fadeInput = document.getElementById('fadeInput');
+
+  // Initialize options UI
+  chkSingle.checked = !!options.single;
+  chkLoop.checked   = !!options.loop;
+  fadeInput.value   = Number(options.fade ?? 2.0).toFixed(1);
+
+  chkSingle.addEventListener('change', () => { options.single = chkSingle.checked; saveOptions(); });
+  chkLoop.addEventListener('change',   () => { options.loop   = chkLoop.checked;   saveOptions(); updateLoopAll(); });
+  fadeInput.addEventListener('input',  () => { options.fade   = clamp(parseFloat(fadeInput.value)||2.0, 0, 60); saveOptions(); });
+
+  // --- Buttons ---
+  document.getElementById('btnAddUrl').addEventListener('click', () => {
+    const name = (nameInput.value || '').trim();
+    let raw = (urlInput.value || '').trim();
+    if (!raw) { blink(urlInput); return; }
+    const list = raw.split(/[\r\n\t ]+/).map(s => s.trim()).filter(Boolean);
+    if (list.length === 0) return;
+
+    const newEntries = [];
+    for (const item of list) {
+      const normalized = normalizeDropboxLink(item);
+      const bestName = (list.length === 1 && name) ? name : (guessNameFromURL(normalized) || 'Unbenannt');
+      const id = genId();
+      newEntries.push({ id, name: bestName, source: normalized, type:'url' });
+    }
+    sounds = [...newEntries, ...sounds];
+    trySaveSounds();
+    renderList();
+    if (list.length === 1) nameInput.value = '';
+  });
+
+  document.getElementById('btnAddFile').addEventListener('click', () => fileInput.click());
+
+  fileInput.addEventListener('change', async (ev) => {
+    const files = Array.from(ev.target.files || []);
+    if (!files.length) return;
+
+    const newEntries = [];
+    for (const f of files) {
+      const id = genId();
+      const displayName = f.name.replace(/\.[^/.]+$/,'') || f.name;
+
+      // Für sehr viele Jingles: große Dateien in IndexedDB, kleine ggf. als Data-URL.
+      const SIZE_THRESHOLD = 200 * 1024; // 200 KB -> alles darüber in IDB
+      if (idbAvailable && f.size > SIZE_THRESHOLD) {
+        try {
+          await idbPut(id, f);
+          newEntries.push({ id, name: displayName, source: 'idb:' + id, type:'data' });
+          continue;
+        } catch { /* fallback auf Data-URL */ }
+      }
+
+      // Data-URL (bei kleinen Dateien oder falls IDB nicht verfügbar)
+      const dataUrl = await fileToDataURL(f);
+      newEntries.push({ id, name: displayName, source: dataUrl, type:'data' });
+    }
+
+    sounds = [...newEntries, ...sounds];
+    trySaveSounds();
+    renderList();
+    fileInput.value = '';
+  });
+
+  document.getElementById('btnBeep').addEventListener('click', async () => {
+    await ensureAudioContext();
+    try { await ctx.resume(); } catch {}
+    const now = ctx.currentTime;
+    const dur = 0.25;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.frequency.value = 880;
+    gain.gain.setValueAtTime(0.0001, now);
+    gain.gain.exponentialRampToValueAtTime(0.8, now + 0.03);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+    osc.connect(gain).connect(ctx.destination);
+    osc.start(now);
+    osc.stop(now + dur + 0.02);
+    osc.onended = () => { try{osc.disconnect(); gain.disconnect();}catch{} };
+  });
+
+  document.getElementById('btnExport').addEventListener('click', () => {
+    const data = JSON.stringify({ sounds, options }, null, 2);
+    const blob = new Blob([data], {type:'application/json'});
+    const href = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = href;
+    a.download = 'soundboard-export.json';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(href); a.remove(); }, 1000);
+    // Hinweis: IDB-Uploads werden aus Speichergründen nicht in die JSON eingebettet (es bleibt die Referenz "idb:<id>").
+    setTimeout(()=>{ try{ window.prompt('JSON kopieren (Strg+C / ⌘C, dann Enter):', data); }catch{} }, 120);
+  });
+
+  document.getElementById('btnImport').addEventListener('click', () => {
+    let txt = '';
+    try {
+      txt = window.prompt('Füge hier das zuvor exportierte JSON ein:', '') || '';
+    } catch { txt=''; }
+    if (!txt.trim()) return;
+    try {
+      const obj = JSON.parse(txt);
+      if (Array.isArray(obj)) {
+        sounds = obj;
+      } else if (obj && Array.isArray(obj.sounds)) {
+        sounds = obj.sounds;
+        if (obj.options) { options = Object.assign({single:true, loop:false, fade:2.0}, obj.options); applyOptionsToUI(); }
+      } else {
+        alert('Ungültiges Format.');
+        return;
+      }
+      trySaveSounds();
+      renderList();
+    } catch (e) {
+      alert('JSON konnte nicht geparst werden.');
+    }
+  });
+
+  document.getElementById('btnClearAll').addEventListener('click', async () => {
+    if (!confirm('Wirklich alle Einträge löschen?')) return;
+    stopAll(true);
+    sounds = [];
+    trySaveSounds();
+    await idbClear();
+    renderList();
+  });
+
+  // --- Render initial list ---
+  renderList();
+
+  // --- Functions ---
+  function addCard(entry){
+    const s = entry;
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.dataset.id = s.id;
+
+    const meta = document.createElement('div');
+    meta.className = 'meta';
+    const title = document.createElement('div');
+    title.className = 'title';
+    title.textContent = s.name;
+    const src = document.createElement('div');
+    src.className = 'sub';
+    src.textContent = s.type === 'data' ? '(lokale Datei gespeichert)' : s.source;
+    const tags = document.createElement('div');
+    tags.className = 'sub';
+    tags.innerHTML = `<span class="pill">${s.type === 'data' ? 'Upload' : 'URL'}</span>`;
+    meta.appendChild(title);
+    meta.appendChild(src);
+    meta.appendChild(tags);
+
+    const actions = document.createElement('div');
+    actions.className = 'actions';
+    const btnPlay  = btn('▶︎ Play', 'primary small');
+    const btnStop  = btn('⏹ Stop (Fade)', 'small');
+    const btnDel   = btn('Löschen', 'danger small');
+    actions.append(btnPlay, btnStop, btnDel);
+
+    const info = document.createElement('div');
+    info.className = 'error';
+    info.style.flexBasis = '100%';
+
+    btnPlay.addEventListener('click', () => playSound(s.id));
+    btnStop.addEventListener('click', () => stopSound(s.id));
+    btnDel.addEventListener('click', async () => {
+      stopSound(s.id, 0.05);
+      const toDelete = sounds.find(x => x.id === s.id);
+      sounds = sounds.filter(x => x.id !== s.id);
+      trySaveSounds();
+      if (toDelete && toDelete.type === 'data' && String(toDelete.source||'').startsWith('idb:')){
+        await idbDelete(String(toDelete.source).slice(4));
+      }
+      renderList();
+    });
+
+    card.append(meta, actions, info);
+    return card;
+  }
+
+  function renderList(){
+    listEl.innerHTML = '';
+    // Render aktuell in umgekehrter Reihenfolge (neu zuerst)
+    const frag = document.createDocumentFragment();
+    for (const s of sounds) frag.appendChild(addCard(s));
+    listEl.appendChild(frag);
+  }
+
+  function btn(label, cls=''){
+    const b = document.createElement('button');
+    b.className = `btn ${cls}`;
+    b.textContent = label;
+    return b;
+  }
+
+  function updateError(id, text){
+    const el = listEl.querySelector(`.card[data-id="${cssEscape(id)}"] .error`);
+    if (el) el.textContent = text || '';
+  }
+
+  function updateLoopAll(){
+    for (const [, p] of players){
+      if (p?.audio) p.audio.loop = !!options.loop;
+    }
+  }
+
+  async function playSound(id){
+    const s = sounds.find(x => x.id === id);
+    if (!s) return;
+
+    if (options.single) {
+      for (const [otherId, p] of players) {
+        if (otherId !== id && p?.audio && !p.audio.paused && !p.audio.ended) {
+          stopSound(otherId);
+        }
+      }
+    }
+
+    let p = players.get(id);
+    if (!p) { p = {}; players.set(id, p); }
+
+    let audio = p.audio;
+    if (!audio) {
+      audio = new Audio();
+      audio.preload = 'auto';
+      audio.loop = !!options.loop;
+      audio.playsInline = true;
+      p.audio = audio;
+
+      audio.addEventListener('error', () => {
+        const err = audio.error;
+        let msg = 'Fehler beim Abspielen.';
+        if (err) {
+          const map = {1:'Abbruch (MEDIA_ERR_ABORTED)', 2:'Netzwerkfehler (MEDIA_ERR_NETWORK)', 3:'Decoderfehler (MEDIA_ERR_DECODE)', 4:'Quelle nicht unterstützt (MEDIA_ERR_SRC_NOT_SUPPORTED)'};
+          msg = map[err.code] || msg;
+          // Dropbox /scl/ ohne rlkey?
+          try {
+            const u = new URL(audio.src);
+            if (u.hostname.includes('dropboxusercontent.com') && u.pathname.includes('/scl/fi/') && !u.searchParams.has('rlkey')) {
+              msg += ' – Hinweis: Dieser Dropbox-/scl/-Link benötigt den Parameter "rlkey". Bitte den Original-Teilen-Link verwenden.';
+            }
+          } catch {}
+        }
+        updateError(id, msg);
+      });
+      audio.addEventListener('ended', () => updateError(id, ''));
+    }
+
+    // Quelle zuweisen + sofort starten
+    let revokeAfterStop = false;
+    if (s.type === 'data') {
+      try {
+        if (String(s.source||'').startsWith('idb:') && idbAvailable) {
+          const blobId = String(s.source).slice(4);
+          const blob = await idbGet(blobId);
+          if (!blob) {
+            updateError(id, 'Lokale Datei nicht mehr vorhanden.');
+            return;
+          }
+          const blobUrl = URL.createObjectURL(blob);
+          if (p.blobUrl) { try{ URL.revokeObjectURL(p.blobUrl); }catch{} }
+          p.blobUrl = blobUrl;
+          audio.src = blobUrl;
+          audio.type = blob.type || '';
+          revokeAfterStop = true;
+        } else {
+          // Data-URL -> Blob -> BlobURL (kein fetch(data:...))
+          const {blob, mime} = dataURLToBlob(s.source);
+          const blobUrl = URL.createObjectURL(blob);
+          if (p.blobUrl) { try{ URL.revokeObjectURL(p.blobUrl); }catch{} }
+          p.blobUrl = blobUrl;
+          audio.src = blobUrl;
+          audio.type = mime || '';
+          revokeAfterStop = true;
+        }
+      } catch (e) {
+        updateError(id, 'Upload konnte nicht gelesen werden.');
+        return;
+      }
+    } else {
+      audio.src = normalizeDropboxLink(s.source);
+    }
+
+    try { audio.load(); } catch {}
+
+    // Start sofort
+    try {
+      await ensureAudioContext(); // create if needed
+      try { await ctx.resume(); } catch {}
+      await audio.play();
+    } catch (e) {
+      try { audio.currentTime = 0.01; } catch {}
+      try { await audio.play(); } catch (e2) { updateError(id, 'Konnte nicht starten. Eventuell iOS-Freigabe erforderlich.'); }
+    }
+
+    // WebAudio für Fades verbinden
+    if (!p.connected) {
+      try {
+        await ensureAudioContext();
+        try { await ctx.resume(); } catch {}
+        if (!p.sourceNode) {
+          p.sourceNode = ctx.createMediaElementSource(audio); // kann bei CORS throwen
+        }
+        p.gainNode = ctx.createGain();
+        p.gainNode.gain.setValueAtTime(1.0, ctx.currentTime);
+        p.sourceNode.connect(p.gainNode).connect(ctx.destination);
+        p.connected = true;
+        p.usingVolumeFallback = false;
+        updateCorsBanner();
+      } catch (e) {
+        p.connected = false;
+        p.usingVolumeFallback = true;
+        updateCorsBanner();
+      }
+    } else {
+      try {
+        if (p.sourceNode && (!p.gainNode || !isNodeConnected(p.gainNode))) {
+          p.gainNode = ctx.createGain();
+          p.gainNode.gain.setValueAtTime(1.0, ctx.currentTime);
+          p.sourceNode.connect(p.gainNode).connect(ctx.destination);
+        }
+        p.usingVolumeFallback = false;
+        updateCorsBanner();
+      } catch {
+        p.usingVolumeFallback = true;
+        updateCorsBanner();
+      }
+    }
+
+    p.revokeAfterStop = revokeAfterStop;
+    updateError(id, '');
+  }
+
+  function stopSound(id, customFadeSec){
+    const p = players.get(id);
+    if (!p || !p.audio) return;
+    const audio = p.audio;
+    const fadeSec = typeof customFadeSec === 'number' ? customFadeSec : (options.fade || 0);
+
+    if (p.sourceNode && p.gainNode && ctx && !p.usingVolumeFallback){
+      try {
+        const now = ctx.currentTime;
+        const g = p.gainNode.gain;
+        const current = clamp(g.value || 1.0, 0.0001, 1.0);
+        g.cancelScheduledValues(now);
+        g.setValueAtTime(current, now);
+        g.exponentialRampToValueAtTime(0.0001, now + fadeSec);
+        window.setTimeout(() => doStopCleanup(id), Math.max(10, fadeSec*1000 + 40));
+        return;
+      } catch {
+        // weiter unten Volume-Fallback
+      }
+    }
+
+    // Volume-Fallback
+    const steps = Math.max(1, Math.floor(fadeSec * 30));
+    const step = (audio.volume || 1) / steps;
+    let i = 0;
+    const t = window.setInterval(() => {
+      audio.volume = clamp((audio.volume || 0) - step, 0, 1);
+      if (++i >= steps) {
+        clearInterval(t);
+        doStopCleanup(id);
+        audio.volume = 1;
+      }
+    }, 1000/30);
+  }
+
+  function doStopCleanup(id){
+    const p = players.get(id);
+    if (!p || !p.audio) return;
+    try { p.audio.pause(); } catch{}
+    try { p.audio.currentTime = 0; } catch{}
+    if (p.gainNode) {
+      try { p.gainNode.disconnect(); } catch{}
+      try { p.gainNode.gain.setValueAtTime(1.0, ctx ? ctx.currentTime : 0); } catch{}
+      p.gainNode = null;
+    }
+    p.connected = false;
+    if (p.revokeAfterStop && p.blobUrl) {
+      try { URL.revokeObjectURL(p.blobUrl); } catch{}
+      p.blobUrl = null;
+      p.revokeAfterStop = false;
+    }
+  }
+
+  function stopAll(immediate=false){
+    for (const [id] of players) stopSound(id, immediate?0.01:undefined);
+  }
+
+  function isNodeConnected(node){
+    try { return !!node && !!node.context && node.numberOfOutputs >= 0; } catch { return false; }
+  }
+
+  function updateCorsBanner(){
+    const anyFallback = Array.from(players.values()).some(p => p.usingVolumeFallback);
+    corsBanner.classList.toggle('show', !!anyFallback);
+  }
+
+  function applyOptionsToUI(){
+    chkSingle.checked = !!options.single;
+    chkLoop.checked   = !!options.loop;
+    fadeInput.value   = Number(options.fade ?? 2.0).toFixed(1);
+    updateLoopAll();
+    saveOptions();
+  }
+
+  async function ensureAudioContext(){
+    if (ctx) return ctx;
+    const C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return null;
+    ctx = new C();
+    return ctx;
+  }
+
+  function trySaveSounds(){
+    try {
+      localStorage.setItem(LS_SOUNDS, JSON.stringify(sounds));
+    } catch (e) {
+      // localStorage voll – Hinweis & Empfehlung: Dropbox-Links benutzen oder große Uploads erneut hinzufügen (IDB wird automatisch genutzt)
+      console.warn('localStorage voll. Bitte große Dateien als Dropbox-Links hinzufügen. Fehler:', e);
+      alert('Lokaler Speicher ist voll. Große Uploads werden am besten als Dropbox-Links hinzugefügt.\nBestehende Einträge bleiben erhalten.');
+    }
+  }
+
+  function saveOptions(){ localStorage.setItem(LS_OPTS, JSON.stringify(options)); }
+  function loadJSON(key, fallback){
+    try { const t = localStorage.getItem(key); if (!t) return fallback; return JSON.parse(t); } catch { return fallback; }
+  }
+
+  // Migration älterer Versionen (v1/v2) -> v3
+  function migratePrev(){
+    try {
+      const old2 = localStorage.getItem('soundboard_sounds_v2');
+      const old1 = localStorage.getItem('soundboard_sounds_v1');
+      const txt = old2 || old1;
+      if (!txt) return null;
+      const arr = JSON.parse(txt);
+      if (Array.isArray(arr)) {
+        localStorage.setItem(LS_SOUNDS, JSON.stringify(arr));
+        if (old2) localStorage.removeItem('soundboard_sounds_v2');
+        if (old1) localStorage.removeItem('soundboard_sounds_v1');
+        return arr;
+      }
+    } catch {}
+    return null;
+  }
+
+  function fileToDataURL(file){
+    return new Promise((resolve,reject)=>{
+      const fr = new FileReader();
+      fr.onerror = () => reject(new Error('Lesefehler'));
+      fr.onload = () => resolve(String(fr.result));
+      fr.readAsDataURL(file);
+    });
+  }
+
+  function dataURLToBlob(dataURL){
+    const m = /^data:([^;,]+)?(;base64)?,(.*)$/i.exec(dataURL);
+    if (!m) throw new Error('keine Data-URL');
+    const mime = m[1] || 'application/octet-stream';
+    const isB64 = !!m[2];
+    const data = m[3] || '';
+    let bytes;
+    if (isB64) {
+      const binStr = atob(data);
+      bytes = new Uint8Array(binStr.length);
+      for (let i=0;i<binStr.length;i++) bytes[i] = binStr.charCodeAt(i);
+    } else {
+      const decoded = decodeURIComponent(data.replace(/\+/g,'%20'));
+      bytes = new TextEncoder().encode(decoded);
+    }
+    return { blob: new Blob([bytes], {type:mime}), mime };
+  }
+
+  // *** KORREKTE Dropbox-Normalisierung ***
+  function normalizeDropboxLink(input){
+    let str = (input||'').trim();
+    if (!str) return str;
+    try {
+      const u = new URL(str);
+      if (u.hostname.endsWith('dropbox.com')) u.hostname = 'dl.dropboxusercontent.com';
+      if (u.hostname === 'dl.dropbox.com') u.hostname = 'dl.dropboxusercontent.com';
+      // Nur unerwünschte Parameter entfernen – rlkey & Co. behalten!
+      const toRemove = ['dl','st','preview','e','utm_source','utm_medium','utm_campaign','t','fbclid','m','token'];
+      for (const k of toRemove) u.searchParams.delete(k);
+      u.searchParams.set('raw','1'); // streamen
+      u.hash = '';
+      return u.origin + u.pathname + (u.searchParams.toString() ? ('?' + u.searchParams.toString()) : '');
+    } catch {
+      // Fallback: string-basiert (rlkey beibehalten)
+      let url = str.replace(/^https?:\/\/(www\.)?dropbox\.com/i, 'https://dl.dropboxusercontent.com');
+      url = url.replace(/^https?:\/\/dl\.dropbox\.com/i, 'https://dl.dropboxusercontent.com');
+      const parts = url.split('#')[0].split('?');
+      const base = parts[0];
+      const query = parts[1] || '';
+      const params = new URLSearchParams(query);
+      ['dl','st','preview','e','utm_source','utm_medium','utm_campaign','t','fbclid','m','token'].forEach(k=>params.delete(k));
+      params.set('raw','1');
+      const qs = params.toString();
+      return base + (qs ? '?' + qs : '');
+    }
+  }
+
+  function guessNameFromURL(u){
+    try { const url = new URL(u); const path = url.pathname.split('/').filter(Boolean); const last = path[path.length-1]||''; return decodeURIComponent((last||'').replace(/\.[^/.]+$/,'')); }
+    catch { return ''; }
+  }
+
+  function genId(){ return Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4); }
+  function clamp(v,min,max){ return Math.min(max, Math.max(min, v)); }
+  function blink(el){ el.style.outline='2px solid '+getComputedStyle(document.documentElement).getPropertyValue('--accent'); setTimeout(()=>el.style.outline='', 500); }
+  function cssEscape(str){ return String(str).replace(/"/g,'\\"'); }
+
+  // Safari decode helper (Vorgabe)
+  function decodeAudioDataSafe(audioCtx, arrayBuffer){
+    return new Promise((resolve,reject)=>{
+      try{
+        const p = audioCtx.decodeAudioData(arrayBuffer, buf=>resolve(buf), err=>reject(err));
+        if (p && typeof p.then === 'function') { p.then(resolve).catch(reject); }
+      }catch(e){ reject(e); }
+    });
+  }
+
+})();
+</script>
+
+<!--
+SCHNELLSTART (kurz)
+
+PC (Windows):
+1) Diese index.html doppelklicken (läuft via file://).
+2) „Aus Datei hinzufügen“ (mehrere Dateien möglich) oder viele Dropbox-URL(s) einfügen (je Zeile) → „Hinzufügen (URL)“.
+3) Play drücken. Stop mit Fade (Standard 2,0 s). „Nur ein Jingle gleichzeitig“ stoppt andere automatisch.
+
+iPhone/iPad (Safari/Chrome):
+1) Datei in iCloud Drive speichern.
+2) In „Dateien“-App: Datei teilen → „In Safari öffnen“ (oder zum Home-Bildschirm).
+3) Overlay „Audio aktivieren“ antippen.
+4) Uploads liefern zuverlässige Fades (GainNode). Externe Links können wegen CORS nur Lautstärke-Fades nutzen.
+
+Hinweise für 300+ Jingles:
+• Viele Jingles als Dropbox-Links hinzufügen (klein, schnell, beliebig viele).
+• Bei Uploads speichert die App große Dateien automatisch in IndexedDB (lokal), nicht mehr als riesige Data-URLs in localStorage – so passt auch eine große Sammlung.
+• Export/Import speichert die Liste (inkl. IDB-Verweise). Große Upload-Dateien selbst bleiben lokal im Browser-Speicher.
+
+Persistenz:
+• Liste bleibt nach Reload erhalten (localStorage). Upload-Daten liegen (falls groß) in IndexedDB.
+-->
+</body>
+</html>
